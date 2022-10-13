@@ -35,10 +35,17 @@ const AvailableMeals = () => {
 
   const [meals, setMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [httpError, setHttpError] = useState();
 
   useEffect(() => {
     const fetchMeals = async () => {
-      const response = await fetch("https://book-your-meals-default-rtdb.asia-southeast1.firebasedatabase.app/meals.json")
+      const response = await fetch("https://book-your-meals-default-rtdb.asia-southeast1.firebasedatabase.app/meals")
+      // if occur any fetch related error then fetch method automatically throw an respective error.
+      // so below code is not required.
+      
+      // if (!response.ok)
+      //   throw new Error("Somthing went wrong!");
+
       const responseData = await response.json();
 
       const loadedMeals = [];
@@ -56,7 +63,11 @@ const AvailableMeals = () => {
       setIsLoading(false);
     }
     
-    fetchMeals();
+    fetchMeals().catch(error => {
+      console.log(error);
+      setHttpError(error.message);
+      setIsLoading(false);
+    });
   
   }, []);
 
@@ -71,7 +82,10 @@ const AvailableMeals = () => {
   ));
 
   if (isLoading)
-    return <section className={classes.mealsLoading}><p>Loading...</p></section>
+    return <section className={classes.mealsLoading}><p>Loading...</p></section>;
+
+  if (httpError)
+    return <section className={classes.mealsError}><p>{httpError}</p></section>;
 
   return (
     <section className={classes.meals}>
