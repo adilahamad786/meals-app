@@ -39,10 +39,10 @@ const AvailableMeals = () => {
 
   useEffect(() => {
     const fetchMeals = async () => {
-      const response = await fetch("https://book-your-meals-default-rtdb.asia-southeast1.firebasedatabase.app/meals")
+      const response = await fetch("https://book-your-meals-default-rtdb.asia-southeast1.firebasedatabase.app/meals.json")
       // if occur any fetch related error then fetch method automatically throw an respective error.
       // so below code is not required.
-      
+
       // if (!response.ok)
       //   throw new Error("Somthing went wrong!");
 
