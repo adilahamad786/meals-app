@@ -12,6 +12,9 @@ const Cart = (props) => {
   const hasItems = cartCtx.items.length > 0;
 
   const [isCheckout, setIsCheckout] = useState(false);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
 
   const cartItemAddHandler = (item) => {
     cartCtx.addItem(item);
@@ -23,6 +26,22 @@ const Cart = (props) => {
 
   const orderHandler = () => {
     setIsCheckout(prevState => !prevState);
+  }
+
+  const submitOrderedHandler = (userInfo) => {
+    setIsSubmitting(true);
+
+    fetch("https://book-your-meals-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json", {
+      method : "POST",
+      body : JSON.stringify({
+        userInfo : userInfo,
+        orderedItems : cartCtx.items
+      })
+    })
+
+    setIsSubmitting(false);
+    setDidSubmit(true);
+    cartCtx.clear();
   }
 
   const cartItems = (
@@ -45,16 +64,30 @@ const Cart = (props) => {
       {hasItems && <button className={classes.button} onClick={orderHandler}>Order</button>}
     </div>
 
-  return (
-    <Modal onHideCart={props.onHideCart}>
-      {cartItems}
+  const cartModalContent = (<>
+    {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      { isCheckout && <Checkout onCancel={orderHandler}/> }
-      { !isCheckout &&  modalActions }
-      
+      { isCheckout && <Checkout onConfirm={submitOrderedHandler} onCancel={orderHandler}/> }
+      { !isCheckout &&  modalActions } 
+  </>);
+
+  const isSubmittingModalContent = <p>Sending order data...</p>;
+
+  const didSubmittingModalContent = (<>
+    <p>Successfully sent the order!</p>
+    <div className={classes.actions}>
+      <button className={classes.button} onClick={props.onHideCart}>Close</button>
+    </div>
+  </>);
+
+  return (
+    <Modal onHideCart={props.onHideCart}>
+       { !isSubmitting && !didSubmit && cartModalContent }
+       { isSubmitting && isSubmittingModalContent }
+       { !isSubmitting && didSubmit && didSubmittingModalContent}
     </Modal>
   );
 };
